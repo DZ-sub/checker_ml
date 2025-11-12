@@ -58,3 +58,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# python -m sandbox._3moku.models.minmax
