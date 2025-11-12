@@ -102,21 +102,25 @@ class State:
         return str
 
 
+# プレイヤー入力
+def input_action(state: State):
+    legal_actions = state.legal_actions()
+    while True:
+        a = int(input(f"{legal_actions}の数字を入力: "))
+        if a not in legal_actions:
+            print("置けない場所")
+            continue
+        return a
+
+
+# ランダム入力
+def random_action(state: State):
+    legal_actions = state.legal_actions()
+    return legal_actions[random.randint(0, len(legal_actions) - 1)]
+
+
 # テスト用のメイン関数
 def main():
-    # プレイヤー入力
-    def input_action(state: State):
-        legal_actions = state.legal_actions()
-        while True:
-            a = int(input(f"{legal_actions}の数字を入力: "))
-            if a not in legal_actions:
-                print("置けない場所")
-                continue
-            return a
-    # ランダム
-    def random_action(state: State):
-        legal_actions = state.legal_actions()
-        return legal_actions[random.randint(0, len(legal_actions) - 1)]
 
     # 初期盤面
     state = State()
