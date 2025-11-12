@@ -104,7 +104,7 @@ class State:
 
 # テスト用のメイン関数
 def main():
-    # 石の入力
+    # プレイヤー入力
     def input_action(state: State):
         legal_actions = state.legal_actions()
         while True:
@@ -113,6 +113,10 @@ def main():
                 print("置けない場所")
                 continue
             return a
+    # ランダム
+    def random_action(state: State):
+        legal_actions = state.legal_actions()
+        return legal_actions[random.randint(0, len(legal_actions) - 1)]
 
     # 初期盤面
     state = State()
@@ -121,7 +125,7 @@ def main():
         if state.is_done():
             break
         # 行動の取得
-        action = input_action(state)
+        action = random_action(state)
         # 状態の更新
         state = state.next(action)
         # 表示
