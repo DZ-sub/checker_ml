@@ -16,7 +16,7 @@ def alpha_beta(state: State, alpha, beta):
     # 合法手の状態価値を計算
     for action in state.legal_actions():
         score = -alpha_beta(state.next(action), -beta, -alpha)  # スコアを再帰的に計算
-        
+
         # α値を更新
         if score > alpha:
             alpha = score
@@ -25,9 +25,10 @@ def alpha_beta(state: State, alpha, beta):
         ## 関数をマイナスで呼び出しているので、符号が逆になることに注意
         if alpha >= beta:
             return alpha
-        
+
     # 最良の状態価値を返す
     return alpha
+
 
 def alpha_beta_action(state: State):
     best_action = 0
@@ -38,7 +39,6 @@ def alpha_beta_action(state: State):
         if score > alpha:
             best_action = action
             alpha = score
-            
 
         str[0] = f"{str[0]}{action:2d}"
         str[1] = f"{str[1]}{score:2d}"
@@ -46,6 +46,7 @@ def alpha_beta_action(state: State):
     print("action:", str[0], "\nscore: ", str[1], "\n")
 
     return best_action
+
 
 def main():
     state = State()
@@ -62,8 +63,9 @@ def main():
             action = mini_max_action(state)
         # 状態更新
         state = state.next(action)
-        # 表示  
+        # 表示
         print(state)
+
 
 if __name__ == "__main__":
     main()
