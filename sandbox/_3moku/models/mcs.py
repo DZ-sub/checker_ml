@@ -75,12 +75,15 @@ def play(next_actions):
     return first_player_point(state)
 
 
-# パラメータ
-EP_GAME_COUNT = 100  # 1評価あたりのゲーム数
-
-
 # アルゴリズム評価
-def evaluate_algorithm_of(label, next_actions):
+def evaluate_algorithm_of(label, next_actions, EP_GAME_COUNT = 100):
+    """
+    next_actions回ゲームを繰り返してその平均成績を見る
+
+    label: アルゴリズム名
+    next_actions: (先手の行動選択関数, 後手の行動選択関数)
+    EP_GAME_COUNT: 対戦回数
+    """
     # 複数回の対戦を繰り返す
     total_point = 0
     for i in range(EP_GAME_COUNT):
