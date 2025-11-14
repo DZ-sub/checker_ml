@@ -76,7 +76,7 @@ def play(next_actions):
 
 
 # アルゴリズム評価
-def evaluate_algorithm_of(label, next_actions, EP_GAME_COUNT = 100):
+def evaluate_algorithm_of(label, next_actions, EP_GAME_COUNT=100):
     """
     next_actions回ゲームを繰り返してその平均成績を見る
 

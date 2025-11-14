@@ -1,5 +1,4 @@
 import random
-import math
 
 
 # ゲーム状態

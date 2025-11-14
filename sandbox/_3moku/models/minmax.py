@@ -1,6 +1,6 @@
 # ミニマックス法
 
-from sandbox._3moku.game import State, input_action, random_action
+from sandbox._3moku.game import State, random_action
 
 
 # ミニマックス法で状態価値計算（再帰関数）
