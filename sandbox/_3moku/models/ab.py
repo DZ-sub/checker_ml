@@ -2,6 +2,7 @@
 
 from sandbox._3moku.game import State
 from sandbox._3moku.models.minmax import mini_max_action
+from sandbox._3moku.models.utils.gameplay import play
 
 
 def alpha_beta(state: State, alpha, beta):
@@ -48,26 +49,7 @@ def alpha_beta_action(state: State):
     return best_action
 
 
-def main():
-    state = State()
-
-    # ゲームループ
-    while True:
-        # ゲーム終了判定
-        if state.is_done():
-            break
-        # 行動選択
-        if state.is_first_player():
-            action = alpha_beta_action(state)
-        else:
-            action = mini_max_action(state)
-        # 状態更新
-        state = state.next(action)
-        # 表示
-        print(state)
-
-
 if __name__ == "__main__":
-    main()
+    play([alpha_beta_action, mini_max_action])
 
 # python -m sandbox._3moku.models.ab

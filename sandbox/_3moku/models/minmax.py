@@ -1,6 +1,7 @@
 # ミニマックス法
 
-from sandbox._3moku.game import State, random_action
+from sandbox._3moku.game import State, random_action, input_action
+from sandbox._3moku.models.utils.gameplay import play
 
 
 # ミニマックス法で状態価値計算（再帰関数）
@@ -47,23 +48,7 @@ def mini_max_action(state: State):
     return best_action
 
 
-def main():
-    # ゲーム状態の初期化
-    state = State()
-
-    while True:
-        if state.is_done():
-            break
-        if state.is_first_player():
-            action = mini_max_action(state)
-        else:
-            # action = input_action(state)
-            action = random_action(state)
-        state = state.next(action)
-        print(state)
-
-
 if __name__ == "__main__":
-    main()
+    play([mini_max_action, input_action])
 
 # python -m sandbox._3moku.models.minmax
