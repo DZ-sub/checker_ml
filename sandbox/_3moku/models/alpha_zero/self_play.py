@@ -1,3 +1,5 @@
+# セルフプレイによる学習データ生成（強化学習）
+
 from sandbox._3moku.game import State
 from sandbox._3moku.models.alpha_zero.dual_network import DN_OUTPUT_SIZE
 from sandbox._3moku.models.alpha_zero.pv_mcts import pv_mcts_scores
@@ -5,10 +7,14 @@ from sandbox._3moku.models.alpha_zero.pv_mcts import pv_mcts_scores
 from keras.models import load_model
 from keras import backend as K
 from datetime import datetime
-from pathlib import Path
+from dotenv import load_dotenv
 import numpy as np
 import pickle
 import os
+
+load_dotenv()
+MODEL_DIR_PATH = os.getenv("MODEL_DIR_PATH")
+DATA_DIR_PATH = os.getenv("DATA_DIR_PATH")
 
 # セルフプレイを行うゲーム数
 SP_GAME_COUNT = 500
@@ -28,8 +34,8 @@ def first_player_value(ended_state: State):
 # 学習データの保存
 def write_data(history):
     now = datetime.now().strftime("%Y%m%d_%H%M%S")
-    os.makedirs("./data/", exist_ok=True)
-    path = f"./data/self_play_{now}.pkl"
+    os.makedirs(DATA_DIR_PATH, exist_ok=True)
+    path = f"{DATA_DIR_PATH}/self_play_{now}.pkl"
     with open(path, "wb") as f:
         pickle.dump(history, f)
 
@@ -65,11 +71,11 @@ def play(model):
     return history
 
 # セルフプレイの実行
-def self_play(model_path: str):
+def self_play():
     # 学習データ
     history = []
     # モデルの読み込み
-    model = load_model(model_path, compile=False)
+    model = load_model(f"{MODEL_DIR_PATH}/best.keras", compile=False)
     # 複数回のゲームの実行
     for i in range(SP_GAME_COUNT):
         # 1ゲームの実行
@@ -87,6 +93,6 @@ def self_play(model_path: str):
 
 if __name__ == "__main__":
     # セルフプレイの実行
-    self_play("sandbox/_3moku/saved_models/best.h5")
+    self_play()
 
 # python -m sandbox._3moku.models.alpha_zero.self_play

@@ -1,3 +1,5 @@
+# デュアルネットワークの定義
+
 from keras.layers import (
     Activation,
     Add,
@@ -10,7 +12,11 @@ from keras.layers import (
 from keras.models import Model
 from keras.regularizers import l2
 from keras import backend as K
+from dotenv import load_dotenv
 import os
+
+load_dotenv()
+MODEL_DIR_PATH = os.getenv("MODEL_DIR_PATH")
 
 # パラメータ準備
 DN_FILTERS = 128  # 畳み込み層のカーネル数
@@ -55,9 +61,9 @@ def residual_block():
 
 
 # デュアルネットワークの作成
-def make_dual_network(save_dir_path: str = "./saved_models"):
+def make_dual_network():
     # モデル作成済みの場合は無処理
-    if os.path.exists(f"{save_dir_path}/best.h5"):
+    if os.path.exists(f"{MODEL_DIR_PATH}/best.keras"):
         return
     # 入力層
     input = Input(shape=DN_INPUT_SHAPE)
@@ -86,8 +92,8 @@ def make_dual_network(save_dir_path: str = "./saved_models"):
     model = Model(inputs=input, outputs=[p, v])
 
     # モデル保存
-    os.makedirs(save_dir_path, exist_ok=True)
-    model.save(f"{save_dir_path}/best.h5")
+    os.makedirs(MODEL_DIR_PATH, exist_ok=True)
+    model.save(f"{MODEL_DIR_PATH}/best.keras")
 
     K.clear_session()
     del model
@@ -95,6 +101,6 @@ def make_dual_network(save_dir_path: str = "./saved_models"):
 
 if __name__ == "__main__":
     # デュアルネットワークの作成
-    make_dual_network(save_dir_path="sandbox/_3moku/saved_models")
+    make_dual_network()
 
 # python -m sandbox._3moku.models.alpha_zero.dual_network

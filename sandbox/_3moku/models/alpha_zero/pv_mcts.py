@@ -1,3 +1,5 @@
+# ポリシー・バリュー付きモンテカルロ木探索（PV-MCTS）
+
 from sandbox._3moku.game import State, random_action
 from sandbox._3moku.models.alpha_zero.dual_network import DN_INPUT_SHAPE
 from sandbox._3moku.models.utils.gameplay import play
@@ -6,9 +8,14 @@ from math import sqrt
 from keras.models import load_model
 from pathlib import Path
 import numpy as np
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+MODEL_DIR_PATH = os.getenv("MODEL_DIR_PATH")
 
 # 1推論あたりのシミュレーション回数
-PV_EVALUATE_COUNT = 50
+PV_EVALUATE_COUNT = 100
 
 
 # 推論
@@ -20,7 +27,7 @@ def predict(model, state: State):
     )  # 形状変換（バッチサイズ, 縦, 横, チャンネル）
 
     # 推論
-    y = model.predict(x, batch_size=1)
+    y = model.predict(x, batch_size=1, verbose=0)
 
     # ポリシーとバリューに分割
     # ポリシー（各合法手のスコア）
@@ -139,7 +146,7 @@ def pv_mcts_action(model, temperature=0):
 # 動作確認
 if __name__ == "__main__":
     # モデルの読み込み
-    model_path = Path("sandbox/_3moku/saved_models/best.h5")
+    model_path = Path(f"{MODEL_DIR_PATH}/best.keras")
     model = load_model(model_path, compile=False)
 
     # pv_mctsの行動選択関数を作成
