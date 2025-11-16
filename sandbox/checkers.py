@@ -236,17 +236,19 @@ class Game:
             center_y = row * SQUARE_SIZE + SQUARE_SIZE // 2
             pygame.draw.circle(self.win, GREEN, (center_x, center_y), 15)
 
+    # ゲームルール
     def select(self, row, col):
         if self.game_over:
             return False
             
+        # 何の条件分岐か
         if self.selected_piece:
             result = self._move(row, col)
             if not result:
                 self.selected_piece = None
                 self.valid_moves = {}
                 return self.select(row, col)
-            
+        # 何の条件分岐か
         else:
             piece = self.board.get_piece(row, col)
             if piece != 0 and piece.color == self.turn:
@@ -256,6 +258,7 @@ class Game:
         
         return False
 
+    # ゲームルール（駒の移動）
     def _move(self, row, col):
         if (row, col) in self.valid_moves:
             piece_to_move = self.selected_piece
@@ -265,8 +268,10 @@ class Game:
             if skipped:
                 self.board.remove_piece(skipped)
                 
+            # 選択の色変更
             self.change_turn()
             
+            # ゲーム終了
             if self.winner():
                 self.game_over = True
             
