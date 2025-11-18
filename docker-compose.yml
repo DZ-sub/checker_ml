@@ -40,3 +40,16 @@ services:
     working_dir: /app
     command: python -m sandbox._3moku.models.alpha_zero.evaluate_network
 
+  cycle:
+    build: .
+    image: checker_ml:latest
+    container_name: train_cycle
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - TF_FORCE_GPU_ALLOW_GROWTH=true
+    volumes:
+      - ./sandbox:/app/sandbox
+    working_dir: /app
+    command: python -m sandbox._3moku.models.alpha_zero.train_cycle
+
