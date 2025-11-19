@@ -1,5 +1,6 @@
 import pygame
 import sys
+import random 
 
 # 定数定義
 BOARD_SIZE = 6
@@ -12,7 +13,8 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
-GOLD = (255, 215, 0) # キング駒の色
+GOLD = (255, 215, 0) 
+GREEN = (0, 255, 0) 
 
 class Piece:
     """駒クラス"""
@@ -93,6 +95,18 @@ class Board:
              return self.board[row][col]
         return 0
 
+    # 指定された色のすべての有効な移動を取得
+    def get_all_valid_moves(self, color):
+        all_moves = {}
+        for row in range(BOARD_SIZE):
+            for col in range(BOARD_SIZE):
+                piece = self.board[row][col]
+                if piece != 0 and piece.color == color:
+                    moves = self.get_valid_moves(piece)
+                    if moves:
+                        all_moves[piece] = moves
+        return all_moves
+
     def get_valid_moves(self, piece):
         """有効な移動先を取得。ジャンプ可能な場合はジャンプのみを返す。"""
         moves = {}
@@ -110,9 +124,10 @@ class Board:
         # 2. 通常移動の探索 (ジャンプがない場合のみ)
         
         # RED駒（通常前進）またはキング駒（前進・後退）
+
         if piece.color == RED or piece.king:
             moves.update(self._get_normal_moves(piece, 1)) # 前進
-            
+                
         if piece.color == BLUE or piece.king:
             moves.update(self._get_normal_moves(piece, -1)) # 後退
 
@@ -205,18 +220,69 @@ class Game:
     def __init__(self, win):
         self.win = win
         self.board = Board()
-        self.turn = RED
+        self.turn = random.choice([RED, BLUE]) 
         self.selected_piece = None
         self.valid_moves = {}
+        pygame.font.init()
+        self.font_small = pygame.font.SysFont('meiryo', 30) 
+        self.font_large = pygame.font.SysFont('meiryo', 40, bold=True) 
+        self.game_over = False
+        self.game_over_time = None 
 
     def update(self):
         self.board.draw(self.win)
         self.draw_valid_moves(self.valid_moves)
+        
+        if not self.game_over:
+            self.display_turn() 
+        else:
+            self.display_winner() 
+
         pygame.display.flip()
+
+    def display_turn(self):
+        """現在の手番を画面に表示する"""
+        turn_color_name = "赤 (RED)" if self.turn == RED else "青 (BLUE)"
+        text_surface = self.font_small.render(f'現在の手番: {turn_color_name}', True, self.turn)
+        self.win.blit(text_surface, (10, 10)) 
+
+    def display_winner(self):
+        """勝者を画面中央に表示する"""
+        winner_name = self.winner()
+        if winner_name:
+            lines = winner_name.split('\n')
+            color = BLUE if "青" in winner_name else RED
+            
+            text_surfaces = [self.font_large.render(line, True, color) for line in lines]
+            
+            total_height = sum(surface.get_height() for surface in text_surfaces)
+            max_width = max(surface.get_width() for surface in text_surfaces)
+            
+            # 背景の矩形を計算
+            padding = 40
+            rect_width = max_width + padding
+            rect_height = total_height + (len(lines) - 1) * 10 + padding # 行間を考慮
+            
+            center_x = WIDTH // 2
+            center_y = HEIGHT // 2
+            
+    # 背景を描画
+            s = pygame.Surface((rect_width, rect_height))
+            s.set_alpha(200) 
+            s.fill(BLACK)
+            self.win.blit(s, (center_x - rect_width // 2, center_y - rect_height // 2))
+
+            # 複数行のテキストを中央揃えで描画
+            current_y = center_y - total_height // 2 - (len(lines) - 1) * 5
+            
+            for surface in text_surfaces:
+                text_rect = surface.get_rect(center=(center_x, current_y + surface.get_height() // 2))
+                self.win.blit(surface, text_rect)
+                current_y += surface.get_height() + 10 # 10ピクセルを行間として追加
+
 
     def draw_valid_moves(self, moves):
         # 有効な移動先マスを緑でハイライト
-        GREEN = (0, 255, 0)
         for move in moves:
             row, col = move
             center_x = col * SQUARE_SIZE + SQUARE_SIZE // 2
@@ -225,14 +291,19 @@ class Game:
 
 
     def select(self, row, col):
+        if self.game_over:
+            return False
+            
+        # 既に駒が選択されている場合 (→ 移動を試みる)
         if self.selected_piece:
             result = self._move(row, col)
             if not result:
-                # 移動失敗時は、選択を解除し、新しくクリックしたマスを選択し直す
+                # 無効な移動だった場合、選択を解除し、新しい駒の選択を試みる
                 self.selected_piece = None
                 self.valid_moves = {}
                 return self.select(row, col)
             
+        # 駒が選択されていない場合 (→ 駒の選択を試みる)
         else:
             piece = self.board.get_piece(row, col)
             if piece != 0 and piece.color == self.turn:
@@ -255,6 +326,11 @@ class Game:
                 self.board.remove_piece(skipped)
                 
             self.change_turn()
+            
+            if self.winner():
+                self.game_over = True
+                self.game_over_time = pygame.time.get_ticks() 
+            
             return True
         return False
 
@@ -262,19 +338,36 @@ class Game:
         self.selected_piece = None
         self.valid_moves = {}
         self.turn = BLUE if self.turn == RED else RED
+        
+        # ターン交代後、次のプレイヤーが動かせる駒がないかチェック
+        # winner()を呼び出し、勝敗が確定していれば self.game_over = True にする
+        if not self.game_over and self.winner():
+             self.game_over = True
+             self.game_over_time = pygame.time.get_ticks() # 追加
 
     def winner(self):
-        # Boardクラスでカウントするように変更
+        # 1. 駒がすべて取られた場合の判定
         if self.board.red_pieces == 0:
-            return "BLUEの勝利"
+            return "青 (BLUE) の勝利！"
         elif self.board.blue_pieces == 0:
-            return "REDの勝利"
+            return "赤 (RED) の勝利！"
+
+        # 2. 動かせる駒がなくなった場合の判定 (ステールメイト)
+        current_player_moves = self.board.get_all_valid_moves(self.turn)
+        
+        if not current_player_moves:
+            # 動かせる駒がない場合、そのプレイヤーが負け
+            if self.turn == RED:
+                return "青 (BLUE) の勝利！\n(赤は動けません) "
+            else:
+                return "赤 (RED) の勝利！\n(青は動けません) "
+        
         return None
 
 # Pygame初期化
 pygame.init()
 win = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("6x6 チェッカー 多段ジャンプ対応版")
+pygame.display.set_caption("6x6 チェッカー")
 clock = pygame.time.Clock()
 
 game = Game(win)
@@ -283,18 +376,17 @@ game = Game(win)
 running = True
 while running:
     clock.tick(FPS)
-
-    winner = game.winner()
-    if winner:
-        print(winner)
-        pygame.time.wait(3000) 
-        running = False
-        break
+    
+    if game.game_over and game.game_over_time is not None:
+        # 3秒経過したら自動的に終了
+        if pygame.time.get_ticks() - game.game_over_time >= 3000:
+            running = False
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        
+        if event.type == pygame.MOUSEBUTTONDOWN and not game.game_over:
             x, y = pygame.mouse.get_pos()
             row = y // SQUARE_SIZE
             col = x // SQUARE_SIZE
