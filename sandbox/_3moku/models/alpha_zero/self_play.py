@@ -21,6 +21,7 @@ SP_GAME_COUNT = 500
 # 行動選択の温度パラメータ
 SP_TEMPERATURE = 1.0
 
+
 # 先手プレイヤーの価値
 def first_player_value(ended_state: State):
     if ended_state.is_lose():
@@ -30,7 +31,8 @@ def first_player_value(ended_state: State):
             return 1
     else:
         return 0
-    
+
+
 # 学習データの保存
 def write_data(history):
     now = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -39,7 +41,8 @@ def write_data(history):
     with open(path, "wb") as f:
         pickle.dump(history, f)
 
-#　1ゲームの実行
+
+# 　1ゲームの実行
 def play(model):
     # 学習データ
     history = []
@@ -70,6 +73,7 @@ def play(model):
         value = -value  # プレイヤー交代
     return history
 
+
 # セルフプレイの実行
 def self_play():
     # 学習データ
@@ -90,6 +94,7 @@ def self_play():
     # モデルの破棄
     K.clear_session()
     del model
+
 
 if __name__ == "__main__":
     # セルフプレイの実行

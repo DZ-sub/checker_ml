@@ -6,7 +6,7 @@ from keras.models import load_model
 from keras import backend as K
 from pathlib import Path
 from shutil import copy
-from dotenv import load_dotenv 
+from dotenv import load_dotenv
 import numpy as np
 import os
 
@@ -19,13 +19,12 @@ EN_GAME_COUNT = 10
 # ボルツマン分布の温度パラメータ
 EN_TEMPERATURE = 1.0
 
+
 # ベストプレイヤーの更新
 def update_best_player():
-    copy(
-        f"{MODEL_DIR_PATH}/latest.keras",
-        f"{MODEL_DIR_PATH}/best.keras"
-    )
+    copy(f"{MODEL_DIR_PATH}/latest.keras", f"{MODEL_DIR_PATH}/best.keras")
     print("Best player updated.")
+
 
 # ニューラルネットワークの評価
 def evaluate_network():
@@ -40,9 +39,7 @@ def evaluate_network():
 
     # アルゴリズム評価
     average_point = evaluate_algorithm_of(
-        "BEST",
-        next_action,
-        EP_GAME_COUNT=EN_GAME_COUNT
+        "BEST", next_action, EP_GAME_COUNT=EN_GAME_COUNT
     )
 
     # モデルの破棄
@@ -56,7 +53,8 @@ def evaluate_network():
         return True
     else:
         return False
-    
+
+
 if __name__ == "__main__":
     # ニューラルネットワークの評価
     evaluate_network()

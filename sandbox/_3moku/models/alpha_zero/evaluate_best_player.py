@@ -15,6 +15,7 @@ load_dotenv()
 
 MODEL_DIR = os.getenv("MODEL_DIR")
 
+
 # 最良プレイヤーの評価
 def evaluate_best_player():
     # 最良モデルの読み込み
@@ -38,6 +39,7 @@ def evaluate_best_player():
     # モデルの破棄
     K.clear_session()
     del model
+
 
 if __name__ == "__main__":
     evaluate_best_player()
