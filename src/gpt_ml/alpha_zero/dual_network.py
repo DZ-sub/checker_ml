@@ -1,10 +1,7 @@
-# デュアルネットワークの定義
-
-from src.gpt_ml.checker_state import State
+from src.infrastructure.s3 import upload_model_to_s3, load_bytes_from_s3
 
 import os
 from dotenv import load_dotenv
-
 from keras import backend as K
 from keras.layers import (
     Activation,
@@ -31,8 +28,8 @@ NUM_SQUARES = BOARD_SIZE * BOARD_SIZE
 ACTION_SIZE = NUM_SQUARES * NUM_SQUARES  # 36 * 36 = 1296
 
 # NN パラメータ
-DN_FILTERS = 128       # 畳み込み層のカーネル数
-DN_RESIDUAL_NUM = 16   # 残差ブロック数
+DN_FILTERS = 128  # 畳み込み層のカーネル数
+DN_RESIDUAL_NUM = 16  # 残差ブロック数
 
 # 入力の形状 (縦, 横, チャンネル)
 # チャンネル例:
@@ -50,17 +47,18 @@ DN_OUTPUT_SIZE = ACTION_SIZE
 def conv(filters):
     """共通設定の 2次元畳み込み層（Conv2D）を作るヘルパー関数"""
     return Conv2D(
-        filters=filters,                 # 出力チャンネル数
-        kernel_size=[3, 3],              # 3x3 カーネル（盤面の局所パターンを見る）
-        padding="same",                  # 出力サイズを入力と同じに保つ
-        use_bias=False,                  # バイアス項なし（BatchNorm 前提）
+        filters=filters,  # 出力チャンネル数
+        kernel_size=[3, 3],  # 3x3 カーネル（盤面の局所パターンを見る）
+        padding="same",  # 出力サイズを入力と同じに保つ
+        use_bias=False,  # バイアス項なし（BatchNorm 前提）
         kernel_initializer="he_normal",  # He 初期化（ReLU 系推奨）
-        kernel_regularizer=l2(5e-4),     # L2 正則化
+        kernel_regularizer=l2(5e-4),  # L2 正則化
     )
 
 
 def residual_block():
     """ResNet 型の残差ブロック"""
+
     def f(x):
         sc = x
         x = conv(DN_FILTERS)(x)
@@ -82,9 +80,13 @@ def make_dual_network():
     """checker 用 AlphaZero デュアルネットワークを作成して保存"""
 
     # モデル作成済みなら何もしない
-    os.makedirs(MODEL_DIR_PATH, exist_ok=True)
-    model_path = os.path.join(MODEL_DIR_PATH, "best.keras")
-    if os.path.exists(model_path):
+    # os.makedirs(MODEL_DIR_PATH, exist_ok=True)
+    # model_path = os.path.join(MODEL_DIR_PATH, "best.keras")
+    # if os.path.exists(model_path):
+    #     return
+    existing = load_bytes_from_s3("saved_models", "best.keras")
+    if existing:
+        print("S3 に best.keras が既に存在するため、モデル作成をスキップ。")
         return
 
     # 入力層
@@ -116,16 +118,16 @@ def make_dual_network():
     # モデル作成
     model = Model(inputs=input, outputs=[p, v])
 
-    # モデル保存
-    model.save(model_path)
+    # モデル保存（S3）
+    upload_model_to_s3("saved_models", "best.keras", model)
 
     # メモリ解放
     K.clear_session()
     del model
 
 
-
 # State.legal_actions() からの (fr, fc, tr, tc) <-> index 変換に使える
+
 
 def action_to_index(fr, fc, tr, tc):
     """
@@ -144,7 +146,6 @@ def index_to_action(index):
     fr, fc = divmod(from_id, BOARD_SIZE)
     tr, tc = divmod(to_id, BOARD_SIZE)
     return fr, fc, tr, tc
-
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ from src.gpt_ml.alpha_zero.dual_network import (
     action_to_index,
 )
 from src.gpt_ml.alpha_zero.pv_mcts import pv_mcts_scores
+from src.infrastructure.s3 import upload_bytes_to_s3, load_model_from_s3
 
 from keras.models import load_model
 from keras import backend as K
@@ -45,10 +46,12 @@ def first_player_value(ended_state: State):
 # 学習データの保存
 def write_data(history):
     now = datetime.now().strftime("%Y%m%d_%H%M%S")
-    os.makedirs(DATA_DIR_PATH, exist_ok=True)
-    path = f"{DATA_DIR_PATH}/selfplay_{now}.pkl"
-    with open(path, "wb") as f:
-        pickle.dump(history, f)
+    # os.makedirs(DATA_DIR_PATH, exist_ok=True)
+    # path = f"{DATA_DIR_PATH}/selfplay_{now}.pkl"
+    # with open(path, "wb") as f:
+    #     pickle.dump(history, f)
+    body = pickle.dumps(history)
+    upload_bytes_to_s3("data", f"selfplay_{now}.pkl", body)
 
 
 # 1ゲームの実行
@@ -117,8 +120,9 @@ def selfplay():
     history = []
 
     # モデルの読み込み
-    model_path = os.path.join(MODEL_DIR_PATH, "best.keras")
-    model = load_model(model_path, compile=False)
+    # model_path = os.path.join(MODEL_DIR_PATH, "best.keras")
+    # model = load_model(model_path, compile=False)
+    model = load_model_from_s3("saved_models", "best.keras")
 
     # 複数回のゲームの実行
     for i in range(SP_GAME_COUNT):

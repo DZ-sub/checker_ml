@@ -1,6 +1,7 @@
 # 学習データによるニューラルネットワークの訓練・更新
 
 from src.gpt_ml.alpha_zero.dual_network import DN_INPUT_SHAPE
+from src.infrastructure.s3 import upload_model_to_s3, load_model_from_s3, load_some_pickles_from_s3
 
 from keras.callbacks import LearningRateScheduler, LambdaCallback
 from keras.models import load_model
@@ -19,14 +20,14 @@ DATA_DIR_PATH = os.getenv("DATA_DIR_PATH")
 RN_EPOCHS = 100
 
 
-# 学習データの読み込み
-def load_data():
-    paths = sorted(Path(DATA_DIR_PATH).glob("self_play_*.pkl"))
-    if not paths:
-        raise FileNotFoundError(f"No self_play_*.pkl found in {DATA_DIR_PATH}")
-    pickle_path = paths[-1]  # 一番新しいファイル
-    with open(pickle_path, "rb") as f:
-        return pickle.load(f)
+# # 学習データの読み込み
+# def load_data(max_files: int = 10):
+#     paths = sorted(Path(DATA_DIR_PATH).glob("selfplay_*.pkl"))
+#     if not paths:
+#         raise FileNotFoundError(f"No selfplay_*.pkl found in {DATA_DIR_PATH}")
+#     pickle_path = paths[-1]  # 一番新しいファイル
+#     with open(pickle_path, "rb") as f:
+#         return pickle.load(f)
 
 
 def encode_board_to_tensor(boards, turns):
@@ -76,7 +77,8 @@ def encode_board_to_tensor(boards, turns):
 # デュアルネットワークの学習
 def train_network():
     # 学習データの読み込み
-    history = load_data()
+    # history = load_data()
+    history = load_some_pickles_from_s3("data", "selfplay_", max_files=None) # None=全部
     # history の各要素: [ [board, turn], policies, value ]
     state_infos, y_policies, y_values = zip(*history)
     boards, turns = zip(*state_infos)
@@ -86,11 +88,12 @@ def train_network():
 
     # 出力の整形
     y_policies = np.array(y_policies, dtype=np.float32)  # (N, ACTION_SIZE)
-    y_values = np.array(y_values, dtype=np.float32)      # (N,)
+    y_values = np.array(y_values, dtype=np.float32)  # (N,)
 
     # モデルの読み込み
-    model_path = os.path.join(MODEL_DIR_PATH, "best.keras")
-    model = load_model(model_path, compile=False)
+    # model_path = os.path.join(MODEL_DIR_PATH, "best.keras")
+    # model = load_model(model_path, compile=False)
+    model = load_model_from_s3("saved_models", "best.keras")
 
     # モデルのコンパイル
     model.compile(
@@ -112,7 +115,8 @@ def train_network():
     # エポックごとの進捗表示
     print_callback = LambdaCallback(
         on_epoch_end=lambda epoch, logs: print(
-            f"\rTrain {epoch+1}/{RN_EPOCHS}", end="",
+            f"\rTrain {epoch+1}/{RN_EPOCHS}",
+            end="",
         )
     )
 
@@ -128,8 +132,9 @@ def train_network():
     print("")
 
     # モデルの保存（最新パラメータ）
-    latest_path = os.path.join(MODEL_DIR_PATH, "latest.keras")
-    model.save(latest_path)
+    # latest_path = os.path.join(MODEL_DIR_PATH, "latest.keras")
+    # model.save(latest_path)
+    upload_model_to_s3("saved_models", "latest.keras", model)
 
     # モデルの破棄
     K.clear_session()

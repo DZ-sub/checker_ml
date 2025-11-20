@@ -1,8 +1,9 @@
 import random
 
 BOARD_SIZE = 6
-RED = 1   # 上側
-BLUE = -1 # 下側
+RED = 1  # 上側
+BLUE = -1  # 下側
+
 
 class State:
     def __init__(self, board=None, turn=RED, turn_count=0):
@@ -18,9 +19,9 @@ class State:
                 for c in range(BOARD_SIZE):
                     # 上2段に RED、下2段に BLUE を黒マス((r+c)%2==1)に配置
                     if r < 2 and (r + c) % 2 == 1:
-                        board[r][c] = RED       # RED の通常駒
+                        board[r][c] = RED  # RED の通常駒
                     elif r > BOARD_SIZE - 3 and (r + c) % 2 == 1:
-                        board[r][c] = BLUE      # BLUE の通常駒
+                        board[r][c] = BLUE  # BLUE の通常駒
         self.board = board
         self.turn = turn
         self.turn_count = turn_count
@@ -173,9 +174,7 @@ class State:
         # 昇格判定
         color = RED if piece > 0 else BLUE
         if abs(piece) == 1:
-            if (color == RED and tr == BOARD_SIZE - 1) or (
-                color == BLUE and tr == 0
-            ):
+            if (color == RED and tr == BOARD_SIZE - 1) or (color == BLUE and tr == 0):
                 new_board[tr][tc] = 2 if color == RED else -2
 
         # 手番交代
@@ -189,10 +188,10 @@ class State:
     def __str__(self):
         symbols = {
             0: ".",
-            RED: "r",   # RED 通常
-            2: "R",     # RED キング
+            RED: "r",  # RED 通常
+            2: "R",  # RED キング
             BLUE: "b",  # BLUE 通常
-            -2: "B",    # BLUE キング
+            -2: "B",  # BLUE キング
         }
         s = ""
         for r in range(BOARD_SIZE):
@@ -201,7 +200,7 @@ class State:
             s += "\n"
         s += f"Turn: {'RED' if self.turn == RED else 'BLUE'}\n"
         return s
-    
+
 
 # プレイヤー入力（番号で手を選ぶ）
 def input_action(state: State):

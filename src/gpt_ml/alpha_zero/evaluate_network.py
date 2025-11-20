@@ -1,6 +1,10 @@
-from src.gpt_ml.checker_state import State
 from src.gpt_ml.alpha_zero.pv_mcts import pv_mcts_action
 from src.gpt_ml.evaluate import evaluate_algorithm_of
+from src.infrastructure.s3 import (
+    load_model_from_s3,
+    upload_bytes_to_s3,
+    load_bytes_from_s3,
+)
 
 from keras.models import load_model
 from keras import backend as K
@@ -19,20 +23,28 @@ EN_TEMPERATURE = 1.0
 
 # ベストプレイヤーの更新
 def update_best_player():
-    src = os.path.join(MODEL_DIR_PATH, "latest.keras")
-    dst = os.path.join(MODEL_DIR_PATH, "best.keras")
-    copy(src, dst)
-    print("Best player updated.")
+    # src = os.path.join(MODEL_DIR_PATH, "latest.keras")
+    # dst = os.path.join(MODEL_DIR_PATH, "best.keras")
+    # copy(src, dst)
+    # print("Best player updated.")
+    body = load_bytes_from_s3("models", "latest.keras")
+    if not body:
+        print("S3 に models/latest.keras が存在しません。best を更新しません。")
+        return
+
+    upload_bytes_to_s3("models", "best.keras", body)
+    print("Best player updated (S3: models/latest.keras -> models/best.keras).")
 
 
 # ニューラルネットワークの評価
 def evaluate_network():
     # モデルの読み込み
-    latest_model_path = os.path.join(MODEL_DIR_PATH, "latest.keras")
-    best_model_path = os.path.join(MODEL_DIR_PATH, "best.keras")
-
-    latest_model = load_model(latest_model_path, compile=False)
-    best_model = load_model(best_model_path, compile=False)
+    # latest_model_path = os.path.join(MODEL_DIR_PATH, "latest.keras")
+    # best_model_path = os.path.join(MODEL_DIR_PATH, "best.keras")
+    # latest_model = load_model(latest_model_path, compile=False)
+    # best_model = load_model(best_model_path, compile=False)
+    latest_model = load_model_from_s3("saved_models", "latest.keras")
+    best_model = load_model_from_s3("saved_models", "best.keras")
 
     # pv-mcts の行動選択関数を作成
     latest_player = pv_mcts_action(latest_model, EN_TEMPERATURE)

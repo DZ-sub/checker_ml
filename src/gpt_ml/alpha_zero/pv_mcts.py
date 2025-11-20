@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from src.gpt_ml.checker_state import State
 from src.gpt_ml.alpha_zero.dual_network import DN_INPUT_SHAPE, action_to_index
 from src.gpt_ml.gameplay import play
+from src.infrastructure.s3 import load_model_from_s3
 
 # 定数・環境変数
 load_dotenv()
@@ -75,15 +76,16 @@ def predict(model, state: State):
     x = state_to_tensor(state)
 
     # 推論
-    pi_full, v = model.predict(x, batch_size=1, verbose=0)  # pi_full.shape=(1, ACTION_SIZE)
+    pi_full, v = model.predict(
+        x, batch_size=1, verbose=0
+    )  # pi_full.shape=(1, ACTION_SIZE)
 
     # 合法手を取得
     legal_actions = state.legal_actions()  # [(fr,fc,tr,tc, captured_list), ...]
 
     # 各合法手をポリシーベクトル上の index に変換
     indices = [
-        action_to_index(fr, fc, tr, tc)
-        for (fr, fc, tr, tc, captured) in legal_actions
+        action_to_index(fr, fc, tr, tc) for (fr, fc, tr, tc, captured) in legal_actions
     ]
 
     # 合法手に対応するポリシーのみ抽出
@@ -125,9 +127,9 @@ def pv_mcts_scores(state: State, model, temperature):
     class Node:
         def __init__(self, state: State, p):
             self.state = state  # ゲームの状態
-            self.p = p          # ポリシー（事前確率）
-            self.w = 0          # 累計価値
-            self.n = 0          # 試行回数
+            self.p = p  # ポリシー（事前確率）
+            self.w = 0  # 累計価値
+            self.n = 0  # 試行回数
             self.child_nodes = None  # 子ノードのリスト
 
         # 局面の価値の計算
@@ -218,8 +220,9 @@ def pv_mcts_action(model, temperature=0.0):
 # 動作確認
 if __name__ == "__main__":
     # モデルの読み込み
-    model_path = Path(f"{MODEL_DIR_PATH}/best.keras")
-    model = load_model(model_path, compile=False)
+    # model_path = Path(f"{MODEL_DIR_PATH}/best.keras")
+    # model = load_model(model_path, compile=False)
+    model = load_model_from_s3("saved_models", "best.keras")
 
     # pv_mctsの行動選択関数を作成
     pv_mcts = pv_mcts_action(model, temperature=1.0)
@@ -229,6 +232,7 @@ if __name__ == "__main__":
 
     # モデルの破棄
     from keras import backend as K
+
     K.clear_session()
     del model
 
