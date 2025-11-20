@@ -2,3 +2,4 @@ keras
 h5py
 numpy
 python-dotenv
+boto3
