@@ -209,3 +209,6 @@ __marimo__/
 # 保存したモデル
 outputs
 model.tar.gz
+
+# 個人の実行テスト
+bin

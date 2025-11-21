@@ -83,9 +83,14 @@ async def read_root():
     # checker_mlの紹介文を返す
     return {"Hello": "World"}
 
+@app.get("/ping")
+def ping():
+    # 単純に 200 が返れば OK
+    return {"status": "ok"}
+
 
 # AIの行動を取得するエンドポイント
-@app.post("/action")
-async def get_action(req: RequestState):
+@app.post("/invocations")
+async def invocations(req: RequestState):
     action = get_action_by_pv_mcts(req)
-    return {"action": action}
+    return { "version": "1.0.0", "action": action}
