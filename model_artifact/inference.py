@@ -40,7 +40,11 @@ def input_fn(request_body, content_type="application/json"):
 # ---------- 必須: 推論本体 ----------
 def predict_fn(input_data, model):
     """
-    (board, turn) から、AlphaZero+MCTS で次の一手を選ぶ。
+    resoponse:
+    {
+      "selected_piece": [fr, fc],
+      "move_to": [tr, tc],
+    }
     """
     board, turn = input_data
 
