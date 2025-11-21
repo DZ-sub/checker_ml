@@ -1,5 +1,6 @@
 import uvicorn
 
+
 def main():
     # FastAPIアプリを起動
     uvicorn.run(
