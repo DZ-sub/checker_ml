@@ -1,4 +1,4 @@
-from src.infrastructure.s3 import upload_model_to_s3, load_bytes_from_s3
+from src.infrastructure.aws.s3 import upload_model_to_s3, load_bytes_from_s3
 
 import os
 from dotenv import load_dotenv

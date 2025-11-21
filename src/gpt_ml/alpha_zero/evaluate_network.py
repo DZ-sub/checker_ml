@@ -1,6 +1,6 @@
 from src.gpt_ml.alpha_zero.pv_mcts import pv_mcts_action
 from src.gpt_ml.evaluate import evaluate_algorithm_of
-from src.infrastructure.s3 import (
+from src.infrastructure.aws.s3 import (
     load_model_from_s3,
     upload_bytes_to_s3,
     load_bytes_from_s3,

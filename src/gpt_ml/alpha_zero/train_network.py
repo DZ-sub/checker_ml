@@ -1,7 +1,11 @@
 # 学習データによるニューラルネットワークの訓練・更新
 
 from src.gpt_ml.alpha_zero.dual_network import DN_INPUT_SHAPE
-from src.infrastructure.s3 import upload_model_to_s3, load_model_from_s3, load_some_pickles_from_s3
+from src.infrastructure.aws.s3 import (
+    upload_model_to_s3,
+    load_model_from_s3,
+    load_some_pickles_from_s3,
+)
 
 from keras.callbacks import LearningRateScheduler, LambdaCallback
 from keras.models import load_model
@@ -78,7 +82,9 @@ def encode_board_to_tensor(boards, turns):
 def train_network():
     # 学習データの読み込み
     # history = load_data()
-    history = load_some_pickles_from_s3("data", "selfplay_", max_files=None) # None=全部
+    history = load_some_pickles_from_s3(
+        "data", "selfplay_", max_files=None
+    )  # None=全部
     # history の各要素: [ [board, turn], policies, value ]
     state_infos, y_policies, y_values = zip(*history)
     boards, turns = zip(*state_infos)

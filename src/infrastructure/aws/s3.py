@@ -91,7 +91,7 @@ def load_some_pickles_from_s3(
         if not contents:
             print(f"S3 に {prefix}*.pkl が見つかりません。")
             return []
-        
+
         # 更新日時でソート
         sorted_contents = sorted(contents, key=lambda obj: obj["Key"])
         # max_files が指定されている場合は「新しい方から」max_files 個に絞る

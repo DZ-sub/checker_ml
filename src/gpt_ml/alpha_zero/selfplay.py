@@ -6,7 +6,7 @@ from src.gpt_ml.alpha_zero.dual_network import (
     action_to_index,
 )
 from src.gpt_ml.alpha_zero.pv_mcts import pv_mcts_scores
-from src.infrastructure.s3 import upload_bytes_to_s3, load_model_from_s3
+from src.infrastructure.aws.s3 import upload_bytes_to_s3, load_model_from_s3
 
 from keras.models import load_model
 from keras import backend as K

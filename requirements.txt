@@ -3,3 +3,6 @@ h5py
 numpy
 python-dotenv
 boto3
+fastapi
+uvicorn
+pydantic

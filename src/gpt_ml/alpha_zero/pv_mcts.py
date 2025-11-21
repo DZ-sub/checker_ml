@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from src.gpt_ml.checker_state import State
 from src.gpt_ml.alpha_zero.dual_network import DN_INPUT_SHAPE, action_to_index
 from src.gpt_ml.gameplay import play
-from src.infrastructure.s3 import load_model_from_s3
+from src.infrastructure.aws.s3 import load_model_from_s3
 
 # 定数・環境変数
 load_dotenv()

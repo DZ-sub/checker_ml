@@ -11,5 +11,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # アプリケーションコードをコピー
 COPY . .
 
+ENV PORT=8080
+EXPOSE 8080
+
 # デフォルトコマンド
-CMD ["python", "-m", "sandbox._3moku.models.alpha_zero.self_play"]
+CMD ["uvicorn", "src.infrastructure.fastapi.app:app", "--host", "0.0.0.0", "--port", "8080"]
