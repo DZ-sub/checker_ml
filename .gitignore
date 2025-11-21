@@ -207,5 +207,8 @@ marimo/_lsp/
 __marimo__/
 
 # 保存したモデル
-saved_models/
-data/
+outputs
+model.tar.gz
+
+# 個人の実行テスト
+bin

@@ -8,8 +8,16 @@ WORKDIR /app
 COPY requirements.txt* ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# アプリケーションコードをコピー
-COPY . .
+# ソースコードのコピー
+COPY src ./src
 
-# デフォルトコマンド
-CMD ["python", "-m", "sandbox._3moku.models.alpha_zero.self_play"]
+# 環境変数とポート設定
+ENV PORT=8080
+EXPOSE 8080
+
+# # デフォルトコマンド
+# CMD ["uvicorn", "src.infrastructure.fastapi.app:app", "--host", "0.0.0.0", "--port", "8080"]
+
+# SageMaker の `docker run <image> serve` を想定したENTRYPOINT
+ENTRYPOINT ["python", "-m", "src.infrastructure.fastapi.serve"]
+CMD ["serve"]

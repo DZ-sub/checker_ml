@@ -6,8 +6,18 @@ from sandbox._3moku.models.alpha_zero.train_network import train_network
 from sandbox._3moku.models.alpha_zero.evaluate_network import evaluate_network
 from sandbox._3moku.models.alpha_zero.evaluate_best_player import evaluate_best_player
 
-# dual network の作成
-make_dual_network()
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+MODEL_DIR_PATH = os.getenv("MODEL_DIR_PATH")
+
+
+# best.keras が存在しない場合、dual network の作成
+if not os.path.exists(f"{os.getenv(MODEL_DIR_PATH)}/best.keras"):
+    # dual network の作成
+    make_dual_network()
 
 # 学習サイクル回数
 TRAIN_CYCLE_NUM = 100
@@ -23,6 +33,6 @@ for cycle in range(TRAIN_CYCLE_NUM):
     update_best_player = evaluate_network()
     # 最良プレイヤーの評価
     if update_best_player:
-        evaluate_best_player()
+        print("モデルを更新しました。")
 
 # python -m sandbox._3moku.models.alpha_zero.train_cycle
