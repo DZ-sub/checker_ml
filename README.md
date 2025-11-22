@@ -36,7 +36,7 @@ AlphaZeroは、DeepMindによって開発された強化学習アルゴリズム
 
 ## 技術スタック
 
-- **機械学習**: TensorFlow 2.17.0, Keras 3.5.0
+- **機械学習**: TensorFlow 2.17.0 (Dockerベースイメージ), Keras 3.5.0
 - **ゲームエンジン**: Pygame
 - **Webフレームワーク**: FastAPI 0.118.0
 - **コンテナ**: Docker, Docker Compose
@@ -47,8 +47,10 @@ AlphaZeroは、DeepMindによって開発された強化学習アルゴリズム
 
 ### 前提条件
 
-- Docker Desktop（GPUを使用する場合はWSL2とnvidia-container-toolkit）
-- または Python 3.x環境
+- **Docker Desktop**: GPUを使用する場合は以下も必要
+  - Windows: WSL2（Docker Desktopが自動でGPU対応）
+  - Linux: nvidia-container-toolkit
+- **または** Python 3.x環境とTensorFlow 2.17.0
 
 ### Dockerを使用する場合（推奨）
 
