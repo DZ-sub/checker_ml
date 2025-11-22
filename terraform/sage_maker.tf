@@ -13,6 +13,14 @@ resource "aws_sagemaker_model" "checker_realtime_model" {
             TF_FORCE_GPU_ALLOW_GROWTH = "true" # GPUメモリを必要に応じて確保する設定
         }
     }
+
+    vpc_config {
+        security_group_ids = [aws_security_group.sagemaker_sg.id]
+        subnets            = [
+            aws_subnet.private_subnet_1.id,
+            aws_subnet.private_subnet_2.id
+        ]
+    }
   
 }
 
