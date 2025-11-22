@@ -180,7 +180,9 @@ AIの次の手を取得
 **C4モデル**: https://c4model.com/
 
 ### Context
-[C4モデル - コンテキスト図](docs/pdfs/context.pdf)
+<object data="docs/pdfs/context.pdf" type="application/pdf" width="100%" height="600px">
+  <a href="docs/pdfs/context.pdf">PDFを開く</a>
+</object>
 
 ### Container
 
