@@ -1,12 +1,16 @@
 import pygame
 import sys
 import random
+import requests
+import json
 
 # 定数定義
 BOARD_SIZE = 6
 SQUARE_SIZE = 100
 WIDTH, HEIGHT = BOARD_SIZE * SQUARE_SIZE, BOARD_SIZE * SQUARE_SIZE
 FPS = 30
+
+url = "https://4djo1pd0h8.execute-api.ap-northeast-1.amazonaws.com/action"
 
 # 色定義
 WHITE = (255, 255, 255)
@@ -60,6 +64,7 @@ class Board:
         self.create_board()
         self.red_pieces = 6
         self.blue_pieces = 6
+        self.turn_count = 0
 
     def create_board(self):
         # 盤面の初期化と駒の配置
@@ -89,6 +94,44 @@ class Board:
                 piece = self.board[row][col]
                 if piece != 0:
                     piece.draw(win)
+    
+    def state(self, current_turn):
+        # 盤面の状態を数値化して返す
+        board_state = []
+        if self.turn_count != 0:
+            for i in range(BOARD_SIZE):
+                row_state = []
+                for j in range(BOARD_SIZE):
+                    piece = self.board[i][j]
+                    if piece != 0:
+                        if piece.color == RED:
+                            value = 2 if piece.king else 1
+                        else:
+                            value = -2 if piece.king else -1
+                    else:
+                        value = 0
+                    row_state.append(value)
+                board_state.append(row_state)
+        else:
+            # 初期盤面（turn_count が 0 のとき）
+            board_state = [
+                [0, 1, 0, 1, 0, 1],
+                [1, 0, 1, 0, 1, 0],
+                [0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0],
+                [0, -1, 0, -1, 0, -1],
+                [-1, 0, -1, 0, -1, 0],
+            ]
+            # turn_count は既に 0 のはずだが念のため設定
+            self.turn_count = 0
+
+        state = {
+            "board": board_state,
+            "turn": 1 if current_turn == RED else -1,
+            "turn_count": self.turn_count,
+        }
+        return state
+
 
     def move_piece(self, piece, row, col):
         # 駒の移動
@@ -97,11 +140,14 @@ class Board:
         piece.col = col
         self.board[row][col] = piece
 
+        self.turn_count += 1
+
         # キングへの昇格判定
         if (piece.color == RED and row == BOARD_SIZE - 1) or (
             piece.color == BLUE and row == 0
         ):
             piece.make_king()
+        # ここでは API 呼び出しを行わない（Game._move 側で行う）
 
     def remove_piece(self, pieces):
         # 駒の除去（取られた駒）
@@ -358,6 +404,7 @@ class Game:
         return False
 
     def _move(self, row, col):
+
         if (row, col) in self.valid_moves:
             piece_to_move = self.selected_piece
 
@@ -367,13 +414,26 @@ class Game:
             # 取る駒がある場合は除去
             skipped = self.valid_moves[(row, col)]
             if skipped:
-                self.board.remove_piece(skipped)
+                self.board.remove_piece(skipped) 
 
             self.change_turn()
 
             if self.winner():
                 self.game_over = True
                 self.game_over_time = pygame.time.get_ticks()
+
+            # 駒を動かした後の盤面状態をサーバへ送信
+            try:
+                res = requests.post(url, json=self.board.state(self.turn))
+                # レスポンスの JSON を参照できるか確認して出力
+                try:
+                    _ = res.json()
+                    print(f"レスポンス：{type(_.copy()) if hasattr(_, 'copy') else type(_)}")
+                except Exception:
+                    print("レスポンスの JSON 取得に失敗しました")
+                print(self.board.state(self.turn))
+            except Exception as e:
+                print("API送信エラー:", e)
 
             return True
         return False
