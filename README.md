@@ -180,6 +180,7 @@ AIの次の手を取得
 **C4モデル**: https://c4model.com/
 
 ### Context
+[C4モデル - コンテキスト図](docs/pdfs/context.pdf)
 
 ### Container
 
