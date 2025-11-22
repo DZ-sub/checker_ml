@@ -17,9 +17,9 @@
 
 ## 概要
 
-このプロジェクトは、6×6のチェッカーゲームをAlphaZeroアルゴリズムを用いて学習させる機械学習プロジェクトです。
+**このプロジェクトは、6×6のチェッカーゲームをAlphaZeroアルゴリズムを用いて学習させる機械学習プロジェクトです。**
 
-**チェッカー**: https://ja.wikipedia.org/wiki/%E3%83%81%E3%82%A7%E3%83%83%E3%82%AB%E3%83%BC
+## チェッカー: https://ja.wikipedia.org/wiki/%E3%83%81%E3%82%A7%E3%83%83%E3%82%AB%E3%83%BC
 
 **AlphaZero**: https://deepmind.google/blog/alphazero-shedding-new-light-on-chess-shogi-and-go/?utm_source=chatgpt.com
 
@@ -93,6 +93,8 @@ checker_ml/
 - **または** Python 3.x環境とTensorFlow 2.17.0
 
 ### AWSを使用する場合（推奨）
+
+[AWS_SETUP.md](./AWS_SETUP.md) を参照してください。
 
 ### Dockerを使用する場合（推奨）
 
@@ -177,7 +179,7 @@ AIの次の手を取得
 
 ## C4モデル
 
-**C4モデルとは**: https://c4model.com/
+### C4モデルとは: https://c4model.com/
 
 なんちゃってではありますが、C4モデルを作成しました。
 
