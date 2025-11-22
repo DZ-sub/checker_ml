@@ -1,8 +1,9 @@
-keras
-h5py
-numpy
-python-dotenv
-boto3
-fastapi
-uvicorn
-pydantic
+keras==3.5.0
+h5py==3.11.0
+numpy==1.26.4
+python-dotenv==1.0.1
+boto3==1.39.11
+fastapi==0.118.0
+uvicorn==0.27.1
+pydantic==2.9.2
+pygame==2.6.1
