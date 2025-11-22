@@ -1,6 +1,6 @@
 # checker_ml
 
-チェッカー（6×6）ゲーム + AlphaZero実装による機械学習プロジェクト
+チェッカー（6×6）ゲーム + AlphaZeroを参考にした機械学習プロジェクト
 
 ハッカソンの制作物。
 
@@ -18,8 +18,10 @@
 ## 概要
 
 このプロジェクトは、6×6のチェッカーゲームをAlphaZeroアルゴリズムを用いて学習させる機械学習プロジェクトです。
+
 **チェッカー**: https://ja.wikipedia.org/wiki/%E3%83%81%E3%82%A7%E3%83%83%E3%82%AB%E3%83%BC
-**AlphaZero**
+
+**AlphaZero**: https://deepmind.google/blog/alphazero-shedding-new-light-on-chess-shogi-and-go/?utm_source=chatgpt.com
 
 
 ## ディレクトリ構成
