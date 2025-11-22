@@ -1,27 +1,22 @@
-# checker_ml
+## checker_ml
 
-チェッカー（6×6）ゲーム + AlphaZeroを参考にした機械学習プロジェクト
+### チェッカー（6×6）ゲーム + AlphaZeroを参考にした機械学習プロジェクト（ハッカソンの制作物。）
 
-ハッカソンの制作物。
+**チェッカー**: https://ja.wikipedia.org/wiki/%E3%83%81%E3%82%A7%E3%83%83%E3%82%AB%E3%83%BC
+
+**AlphaZero**: https://deepmind.google/blog/alphazero-shedding-new-light-on-chess-shogi-and-go/?utm_source=chatgpt.com
+
 
 ## 📋 目次
 
-- [概要](#概要)
 - [ディレクトリ構成](#ディレクトリ構成)
 - [主な機能](#主な機能)
 - [技術スタック](#技術スタック)
-- [AlphaZeroについての説明](#AlphaZeroについての説明)
 - [セットアップ](#セットアップ)
 - [API仕様](#api仕様)
 - [開発過程](#開発過程)
-
-## 概要
-
-**このプロジェクトは、6×6のチェッカーゲームをAlphaZeroアルゴリズムを用いて学習させる機械学習プロジェクトです。**
-
-## チェッカー: https://ja.wikipedia.org/wiki/%E3%83%81%E3%82%A7%E3%83%83%E3%82%AB%E3%83%BC
-
-**AlphaZero**: https://deepmind.google/blog/alphazero-shedding-new-light-on-chess-shogi-and-go/?utm_source=chatgpt.com
+- [C4モデル](#c4モデル)
+- [参考資料・文献](#参考資料・文献)
 
 
 ## ディレクトリ構成
@@ -80,7 +75,20 @@ checker_ml/
 - **クラウド**: AWS (S3, EC2, Lambda, SageMaker, APIGateway)
 - **言語**: Python 3.x
 
-## 機械学習部分（AlphaZero）についての説明
+### 機械学習部分（AlphaZero）について
+- **src/ml/alpha_zero/dual_network.py**: ニューラルネットワークモデルの定義
+- **src/ml/alpha_zero/pv_mcts.py**: PVモンテカルロ木探索の実装
+- **src/ml/alpha_zero/selfplay.py**: セルフプレイによるデータ生成
+- **src/ml/alpha_zero/train_network.py**: ニューラルネットワークの学習
+- **src/ml/alpha_zero/evaluate_network.py**: モデルの評価と更新
+- **src/ml/alpha_zero/train_cycle.py**: 学習サイクルの管理
+
+```python
+# 子ノードが存在しない時（展開）
+if not self.child_nodes:
+    # ニューラルネットワークでポリシーとバリューを取得
+    policies, value = predict(model, self.state)
+```
 
 
 ## セットアップ
@@ -94,7 +102,7 @@ checker_ml/
 
 ### AWSを使用する場合（推奨）
 
-[AWS_SETUP.md](./AWS_SETUP.md) を参照してください。
+
 
 ### Dockerを使用する場合（推奨）
 
