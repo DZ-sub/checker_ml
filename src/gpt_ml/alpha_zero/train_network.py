@@ -128,8 +128,8 @@ def train_network():
 
     # モデルの学習
     model.fit(
-        x=xs,
-        y=[y_policies, y_values],
+        x=xs, # 入力テンソル（N, H, W, 4）
+        y=[y_policies, y_values], # 出力ポリシーと価値
         batch_size=128,
         epochs=RN_EPOCHS,
         callbacks=[lr_scheduler, print_callback],
