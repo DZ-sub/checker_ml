@@ -1,0 +1,17 @@
+# 学習用: Dockerfile.train
+FROM tensorflow/tensorflow:2.17.0-gpu
+
+WORKDIR /app
+
+COPY requirements.txt* ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 学習コードも全部入れる
+COPY src ./src
+
+# SageMaker 用の標準パス（任意だけど入れておくと楽）
+ENV SM_MODEL_DIR=/opt/ml/model
+ENV SM_CHANNEL_TRAIN=/opt/ml/input/data/train
+
+# デフォルトコマンド = 強化学習の学習ループ
+CMD ["python", "-m", "src.gpt_ml.alpha_zero.train_cycle"]

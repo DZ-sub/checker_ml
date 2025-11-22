@@ -21,7 +21,7 @@ MODEL_DIR_PATH = os.getenv("MODEL_DIR_PATH")
 DATA_DIR_PATH = os.getenv("DATA_DIR_PATH")
 
 # セルフプレイを行うゲーム数
-SP_GAME_COUNT = 5
+SP_GAME_COUNT = 1000
 # 行動選択の温度パラメータ
 SP_TEMPERATURE = 1.0
 
