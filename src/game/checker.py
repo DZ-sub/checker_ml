@@ -122,8 +122,6 @@ class Board:
                 [0, -1, 0, -1, 0, -1],
                 [-1, 0, -1, 0, -1, 0],
             ]
-            # turn_count は既に 0 のはずだが念のため設定
-            self.turn_count = 0
 
         state = {
             "board": board_state,
@@ -314,6 +312,7 @@ class Game:
         self.font_large = pygame.font.SysFont("meiryo", 40, bold=True)
         self.game_over = False
         self.game_over_time = None
+        self.AI_data=None
 
     def update(self):
         self.board.draw(self.win)
@@ -402,6 +401,24 @@ class Game:
                 return True
 
         return False
+    
+    def play_AI(self):
+        if self.turn == BLUE or self.game_over or not self.AI_data:
+            return False
+        try:
+            action=self.AI_data['action']
+            selected_row, selected_col=action["selected_piece"]
+            move_row, move_col=action["move_to"]
+            if self.select(selected_row,selected_col):
+                if self._move(move_row, move_col):
+                    self.AI_data=None
+                    return True
+        except KeyError as e:
+            print(f"AIアクション実行エラー: JSONキー {e} が見つかりません。")
+        except Exception as e:
+            print(f"AIアクション実行中に予期せぬエラーが発生しました: {e}")
+
+        return False
 
     def _move(self, row, col):
 
@@ -422,18 +439,26 @@ class Game:
                 self.game_over = True
                 self.game_over_time = pygame.time.get_ticks()
 
-            # 駒を動かした後の盤面状態をサーバへ送信
-            try:
-                res = requests.post(url, json=self.board.state(self.turn))
-                # レスポンスの JSON を参照できるか確認して出力
+            if self.turn != BLUE:
+                # 駒を動かした後の盤面状態をサーバへ送信
                 try:
-                    _ = res.json()
-                    print(f"レスポンス：{type(_.copy()) if hasattr(_, 'copy') else type(_)}")
-                except Exception:
-                    print("レスポンスの JSON 取得に失敗しました")
-                print(self.board.state(self.turn))
-            except Exception as e:
-                print("API送信エラー:", e)
+                    res = requests.post(url, json=self.board.state(self.turn))
+                    # レスポンスの JSON を参照できるか確認して出力
+                    try:
+                        _ = res.json()
+                        print(f"レスポンス{res.json()}")
+                        self.AI_data=res.json()
+                        AI_selected_piece = self.AI_data['action']['selected_piece'] 
+                        AI_move_to = self.AI_data['action']['move_to'] 
+                        AI_captured_piece = self.AI_data['action']['captured_pieces'][0] if self.AI_data['action']['captured_pieces'] else None
+                        print(f"AIが動かす駒{AI_selected_piece}")
+                        print(f"動かす先{AI_move_to}")
+                        print(f"取る駒{AI_captured_piece}")
+                    except Exception:
+                        print("レスポンスの JSON 取得に失敗しました")
+                    print(self.board.state(self.turn))
+                except Exception as e:
+                    print("API送信エラー:", e)
 
             return True
         return False
@@ -477,6 +502,12 @@ clock = pygame.time.Clock()
 
 game = Game(win)
 
+if game.board.turn_count == 0:
+    res = requests.post(url, json=game.board.state(game.turn))
+    print(game.board.state(game.turn))
+    print(f"レスポンス{res.json()}")
+    game.AI_data=res.json()
+
 # メインループ
 running = True
 while running:
@@ -492,10 +523,13 @@ while running:
             running = False
 
         if event.type == pygame.MOUSEBUTTONDOWN and not game.game_over:
-            x, y = pygame.mouse.get_pos()
-            row = y // SQUARE_SIZE
-            col = x // SQUARE_SIZE
-            game.select(row, col)
+            if game.turn == BLUE:
+                x, y = pygame.mouse.get_pos()
+                row = y // SQUARE_SIZE
+                col = x // SQUARE_SIZE
+                game.select(row, col)
+    if not game.game_over and game.turn == RED and game.AI_data:
+        game.play_AI()
 
     game.update()
 
