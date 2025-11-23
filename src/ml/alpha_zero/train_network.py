@@ -1,6 +1,6 @@
 # 学習データによるニューラルネットワークの訓練・更新
 
-from src.gpt_ml.alpha_zero.dual_network import DN_INPUT_SHAPE
+from src.ml.alpha_zero.dual_network import DN_INPUT_SHAPE
 from src.infrastructure.aws.s3 import (
     upload_model_to_s3,
     load_model_from_s3,

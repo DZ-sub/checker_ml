@@ -1,11 +1,11 @@
 # セルフプレイによる学習データ生成（強化学習）
 
-from src.gpt_ml.checker_state import State
-from src.gpt_ml.alpha_zero.dual_network import (
+from src.ml.checker_state import State
+from src.ml.alpha_zero.dual_network import (
     DN_OUTPUT_SIZE,
     action_to_index,
 )
-from src.gpt_ml.alpha_zero.pv_mcts import pv_mcts_scores
+from src.ml.alpha_zero.pv_mcts import pv_mcts_scores
 from src.infrastructure.aws.s3 import upload_bytes_to_s3, load_model_from_s3
 
 from keras.models import load_model

@@ -1,4 +1,4 @@
-from src.gpt_ml.checker_state import State
+from src.ml.checker_state import State
 
 
 # 先手プレイヤーのポイント

@@ -1,9 +1,9 @@
 # AlphaZero の学習サイクル（checker 用）
 
-from src.gpt_ml.alpha_zero.dual_network import make_dual_network
-from src.gpt_ml.alpha_zero.selfplay import selfplay
-from src.gpt_ml.alpha_zero.train_network import train_network
-from src.gpt_ml.alpha_zero.evaluate_network import evaluate_network
+from src.ml.alpha_zero.dual_network import make_dual_network
+from src.ml.alpha_zero.selfplay import selfplay
+from src.ml.alpha_zero.train_network import train_network
+from src.ml.alpha_zero.evaluate_network import evaluate_network
 
 from dotenv import load_dotenv
 import os

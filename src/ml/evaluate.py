@@ -1,4 +1,4 @@
-from src.gpt_ml.gameplay import play
+from src.ml.gameplay import play
 
 
 # アルゴリズム評価
