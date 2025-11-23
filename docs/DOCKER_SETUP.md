@@ -1,84 +1,97 @@
-# GPU対応機械学習環境セットアップガイド
+(このファイルは再作成されました)
 
-## 前提条件
+## Docker セットアップと運用ガイド
 
-WindowsでDockerを使用してGPUを利用する場合、**WSL2**が必要です。
+このドキュメントはリポジトリ内の `Dockerfile.serve` と `Dockerfile.train` を使ったイメージのビルド、ローカル実行（GPU 対応含む）、および ECR へ push して SageMaker で使うまでの手順をまとめたものです。
 
-### WSL2のセットアップ（まだの場合）
+前提
 
-PowerShellを管理者権限で開き、以下を実行:
+- Docker がインストールされていること（Windows の場合は Docker Desktop + WSL2 推奨）
+- GPU を使う場合は NVIDIA Container Toolkit（nvidia-docker2 相当）がセットアップ済みであること
+- AWS CLI が設定済み（`aws configure` で認証情報とデフォルトリージョンを設定）
+- （ECR に push する場合）ECR にリポジトリが存在するか、作成できる権限があること
+
+主要ファイル
+
+- `Dockerfile.serve` — 推論（serve）イメージ。ENTRYPOINT が `python -m src.infrastructure.fastapi.serve` になっており SageMaker の `serve` コマンド想定。
+- `Dockerfile.train` — 学習用イメージ。デフォルトコマンドで学習ループを起動する想定。
+- `requirements.txt` — 依存パッケージ
+
+ローカルでのビルド（PowerShell 例）
+
 ```powershell
-wsl --install
-wsl --set-default-version 2
+# serve イメージをビルド
+docker build -f Dockerfile.serve -t checker-serve:latest .
+
+# train イメージをビルド
+docker build -f Dockerfile.train -t checker-train:latest .
 ```
 
-再起動後、Docker Desktopの設定で以下を確認:
-1. Settings → General → "Use the WSL 2 based engine" にチェック
-2. Settings → Resources → WSL Integration → Ubuntuを有効化
+コンテナを GPU で実行する（確認用）
 
-## 使い方
+```powershell
+# GPU を使って serve を起動してポート 8080 を公開する
+docker run --rm --gpus all -p 8080:8080 checker-serve:latest
 
-### 1. Dockerイメージのビルド
-```bash
-docker-compose build
+# コンテナ内で Python のバージョンや TensorFlow を確認する
+docker run --rm checker-serve:latest python -c "import sys, tensorflow as tf; print(sys.version); print(tf.__version__)"
 ```
 
-### 2. GPU動作確認
-```bash
-docker run --rm --gpus all checker_ml:latest python -c "import tensorflow as tf; print('GPUs:', tf.config.list_physical_devices('GPU'))"
+注意（Windows）: Docker Desktop + WSL2 の組み合わせで GPU を使うには追加設定が必要です。Docker Desktop の GPU サポート（Windows の WSL2 GPU paravirtualization）や NVIDIA ドライバが正しく入っているか確認してください。
+
+ECR に push して SageMaker で使う
+
+1) ECR リポジトリを作成（存在しない場合）
+
+```powershell
+# リポジトリ名例: checker-serve
+aws ecr create-repository --repository-name checker-serve --region ap-northeast-1
 ```
 
-### 3. セルフプレイでデータ生成
-```bash
-docker-compose run --rm alphazero
+2) ECR にログインしてタグ付け、push
+
+```powershell
+$account_id = (aws sts get-caller-identity --query Account --output text)
+$region = 'ap-northeast-1'
+$repo = "checker-serve"
+$uri = "$account_id.dkr.ecr.$region.amazonaws.com/$repo"
+
+# ログイン
+aws ecr get-login-password --region $region | docker login --username AWS --password-stdin $uri
+
+# タグ付け
+docker tag checker-serve:latest $uri:latest
+
+# push
+docker push $uri:latest
 ```
 
-### 4. モデルの学習
-```bash
-docker-compose run --rm train
-```
+3) Terraform の `ecr_image_uri` 変数にこの URI を設定して `terraform apply` することで、SageMaker のモデル定義でこのイメージを参照できます。
 
-### 5. 対話的にコンテナ内で作業
-```bash
-docker run --rm -it --gpus all -v ${PWD}:/app checker_ml:latest bash
-```
+Python バージョン固定について（選択肢）
 
-## トラブルシューティング
+1. ベースイメージのタグを変える（推奨）
+- 公式 TensorFlow イメージは特定の Python バージョンとビルドされています。互換性を保つため、`FROM tensorflow/tensorflow:<version>-gpu` のタグを公式ドキュメントで確認して、対応する Python バージョンのイメージを選んでください。
 
-### GPUが認識されない場合
+2. Dockerfile 内で Python をインストールして切り替える（上級）
+- Debian ベースのイメージであれば apt で別の Python を追加インストールし、`update-alternatives` で `/usr/bin/python` を切り替える方法があります。ただし TensorFlow や CUDA ランタイムとの互換性に注意が必要です。
 
-1. **nvidia-container-toolkitのインストール（WSL2内で）**
-   ```bash
-   wsl
-   distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
-   curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
-   curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
-   sudo apt-get update
-   sudo apt-get install -y nvidia-container-toolkit
-   sudo systemctl restart docker
-   ```
+実践的な推奨
 
-2. **Docker Desktopの再起動**
+- 基本はベースイメージのタグを変えて Python/TensorFlow の互換性を維持する。
+- もしどうしても Python を入れ替える場合は、イメージをビルドしてテスト（`python -c "import tensorflow as tf; print(tf.__version__)"`）を必ず行う。
+- requirements.txt に GPU/CPU 固有のパッケージが含まれる場合はビルドとテストを徹底する。
 
-### メモリ不足エラーの場合
+トラブルシューティング
 
-Docker Desktopの設定でメモリを増やす:
-- Settings → Resources → Memory → 8GB以上に設定
+- ビルドが失敗する: Docker のキャッシュをクリアして再ビルド（`docker build --no-cache ...`）。
+- GPU が認識されない: `docker run --rm --gpus all nvidia/cuda:11.0-base nvidia-smi` などで GPU が見えるか確認。Docker Desktop と NVIDIA ドライバ / WSL2 のバージョン整合性が必要。
+- Push 時の認証エラー: `aws ecr get-login-password` の結果を使用してログインし、正しいアカウント / リージョンを使っていることを確認。
 
-## ローカル環境との比較
+補足: docker-compose
 
-### Dockerを使う場合
-- ✅ 環境構築が簡単（CUDAインストール不要）
-- ✅ 再現性が高い
-- ✅ 環境を汚さない
-- ❌ 初回セットアップに時間がかかる
+このリポジトリには `docker-compose-sandbox.yml` があり、ローカルの学習/評価ワークフローを複数コンテナで起動する設定が含まれています。GPU を使うために `runtime: nvidia` が設定されていますが、Docker Compose のバージョンや Docker Desktop の設定によっては `--gpus` オプションを明示的に使う必要があります。
 
-### ローカルで直接実行する場合
-- ✅ セットアップ後は高速
-- ✅ デバッグが簡単
-- ❌ CUDA/cuDNNのインストールが必要
-- ❌ 環境が壊れるリスク
+---
+作成者: リポジトリ自動生成ドキュメント
 
-## 推奨フロー
-
-開発中はDockerを使い、本番やデバッグ時はローカル環境を使うのがおすすめです。

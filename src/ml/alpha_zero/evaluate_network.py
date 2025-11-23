@@ -8,6 +8,7 @@ from src.infrastructure.aws.s3 import (
 
 from keras.models import load_model
 from keras import backend as K
+from datetime import datetime
 from shutil import copy
 from dotenv import load_dotenv
 import os
@@ -33,6 +34,9 @@ def update_best_player():
         return
 
     upload_bytes_to_s3("models", "best.keras", body)
+    # タイムスタンプをS3に保存（更新履歴用 + Eventbridgeトリガー）
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    upload_bytes_to_s3("timestamp", f"updated_{timestamp}.txt", b"")
     print("Best player updated (S3: models/latest.keras -> models/best.keras).")
 
 
