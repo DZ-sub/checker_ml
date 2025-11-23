@@ -1,55 +1,72 @@
 version: '3.8'
 
 services:
-  selfplay:
+  api:
     build: .
     image: checker_ml:latest
-    container_name: selfplay_training
+    container_name: checker_ml_api
     runtime: nvidia
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
       - TF_FORCE_GPU_ALLOW_GROWTH=true
+    ports:
+      - "8000:8000"
     volumes:
       - ./sandbox:/app/sandbox
     working_dir: /app
-    command: python -m sandbox._3moku.models.alpha_zero.self_play
+    command: uvicorn sandbox._3moku.api.main:app --host
 
-  train:
-    build: .
-    image: checker_ml:latest
-    container_name: train_network
-    runtime: nvidia
-    environment:
-      - NVIDIA_VISIBLE_DEVICES=all
-      - TF_FORCE_GPU_ALLOW_GROWTH=true
-    volumes:
-      - ./sandbox:/app/sandbox
-    working_dir: /app
-    command: python -m sandbox._3moku.models.alpha_zero.train_network
 
-  evaluate:
-    build: .
-    image: checker_ml:latest
-    container_name: evaluate_network
-    runtime: nvidia
-    environment:
-      - NVIDIA_VISIBLE_DEVICES=all
-      - TF_FORCE_GPU_ALLOW_GROWTH=true
-    volumes:
-      - ./sandbox:/app/sandbox
-    working_dir: /app
-    command: python -m sandbox._3moku.models.alpha_zero.evaluate_network
+  # 強化学習用（AWS推奨）
+  # selfplay:
+  #   build: .
+  #   image: checker_ml:latest
+  #   container_name: selfplay_training
+  #   runtime: nvidia
+  #   environment:
+  #     - NVIDIA_VISIBLE_DEVICES=all
+  #     - TF_FORCE_GPU_ALLOW_GROWTH=true
+  #   volumes:
+  #     - ./sandbox:/app/sandbox
+  #   working_dir: /app
+  #   command: python -m sandbox._3moku.models.alpha_zero.self_play
 
-  cycle:
-    build: .
-    image: checker_ml:latest
-    container_name: train_cycle
-    runtime: nvidia
-    environment:
-      - NVIDIA_VISIBLE_DEVICES=all
-      - TF_FORCE_GPU_ALLOW_GROWTH=true
-    volumes:
-      - ./sandbox:/app/sandbox
-    working_dir: /app
-    command: python -m sandbox._3moku.models.alpha_zero.train_cycle
+  # train:
+  #   build: .
+  #   image: checker_ml:latest
+  #   container_name: train_network
+  #   runtime: nvidia
+  #   environment:
+  #     - NVIDIA_VISIBLE_DEVICES=all
+  #     - TF_FORCE_GPU_ALLOW_GROWTH=true
+  #   volumes:
+  #     - ./sandbox:/app/sandbox
+  #   working_dir: /app
+  #   command: python -m sandbox._3moku.models.alpha_zero.train_network
+
+  # evaluate:
+  #   build: .
+  #   image: checker_ml:latest
+  #   container_name: evaluate_network
+  #   runtime: nvidia
+  #   environment:
+  #     - NVIDIA_VISIBLE_DEVICES=all
+  #     - TF_FORCE_GPU_ALLOW_GROWTH=true
+  #   volumes:
+  #     - ./sandbox:/app/sandbox
+  #   working_dir: /app
+  #   command: python -m sandbox._3moku.models.alpha_zero.evaluate_network
+
+  # cycle:
+  #   build: .
+  #   image: checker_ml:latest
+  #   container_name: train_cycle
+  #   runtime: nvidia
+  #   environment:
+  #     - NVIDIA_VISIBLE_DEVICES=all
+  #     - TF_FORCE_GPU_ALLOW_GROWTH=true
+  #   volumes:
+  #     - ./sandbox:/app/sandbox
+  #   working_dir: /app
+  #   command: python -m sandbox._3moku.models.alpha_zero.train_cycle
 

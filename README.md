@@ -83,12 +83,34 @@ checker_ml/
 - **src/ml/alpha_zero/evaluate_network.py**: モデルの評価と更新
 - **src/ml/alpha_zero/train_cycle.py**: 学習サイクルの管理
 
+
+### 木探索による行動選択の評価
 ```python
+## src/gpt_ml/alpha_zero/pv_mcts.py
+
 # 子ノードが存在しない時（展開）
 if not self.child_nodes:
     # ニューラルネットワークでポリシーとバリューを取得
     policies, value = predict(model, self.state)
 ```
+Policy（行動確率分布）とValue（状態の価値）をニューラルネットワークから取得し、探索を進める。
+
+### 行動選択のための精度改善・モデル構築
+```python
+## src/gpt_ml/alpha_zero/pv_mcts.py
+
+# モデルの学習
+model.fit(
+    x=xs, # 入力テンソル（N, H, W, 4）
+    y=[y_policies, y_values], # 出力ポリシーと価値
+    batch_size=128,
+    epochs=RN_EPOCHS,
+    callbacks=[lr_scheduler, print_callback],
+    verbose=0,
+)
+```
+xs: (サンプル数, 盤面高さ, 盤面幅, チャンネル数)のテンソル
+y: Policy, Value
 
 
 ## セットアップ
@@ -102,7 +124,7 @@ if not self.child_nodes:
 
 ### AWSを使用する場合（推奨）
 
-
+[AWS_SETUP.md](./AWS_SETUP.md) を参照してください。
 
 ### Dockerを使用する場合（推奨）
 
@@ -111,6 +133,51 @@ if not self.child_nodes:
 ## API仕様
 
 ### AWS環境のエンドポイント
+
+https://4djo1pd0h8.execute-api.ap-northeast-1.amazonaws.com/
+
+### `POST /actions`
+
+
+**リクエスト:**
+```json
+{
+  "board": [
+    [0, 1, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 1],
+    [0, -1, 0, 0, -1, 0],
+    [0, 0, 0, 0, 0, 0]
+  ],
+  "turn": 1,
+  "turn_count": 10
+}
+```
+
+**盤面の表記:**
+- `0`: 空マス
+- `1`: RED（赤）の通常駒
+- `2`: REDのキング
+- `-1`: BLUE（青）の通常駒
+- `-2`: BLUEのキング
+
+**手番:**
+- `1`: RED
+- `-1`: BLUE
+
+**レスポンス:**
+```json
+{
+  "version": "1.0.0",
+  "action": {
+    "selected_piece": [4, 1],
+    "move_to": [3, 0],
+    "captured_pieces": []
+  }
+}
+```
+
 
 ### Docker環境のエンドポイント
 
@@ -175,7 +242,6 @@ AIの次の手を取得
   }
 }
 ```
-
 
 ## 開発過程
 

@@ -39,6 +39,10 @@ def encode_board_to_tensor(boards, turns):
     self_play で保存した
       state_info = [board_copy, turn_copy]
     から、(N, H, W, 4) のテンソルを作る。
+    N: サンプル数
+    H: 盤面高さ
+    W: 盤面幅
+    4: チャンネル数
 
     チャンネル定義:
       0: 手番側の通常駒
