@@ -14,4 +14,4 @@ ENV SM_MODEL_DIR=/opt/ml/model
 ENV SM_CHANNEL_TRAIN=/opt/ml/input/data/train
 
 # デフォルトコマンド = 強化学習の学習ループ
-CMD ["python", "-m", "src.gpt_ml.alpha_zero.train_cycle"]
+CMD ["python", "-m", "src.ml.alpha_zero.train_cycle"]
