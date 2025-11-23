@@ -1,10 +1,9 @@
-# alpha zero の学習サイクル
+# AlphaZero の学習サイクル（checker 用）
 
-from sandbox._3moku.models.alpha_zero.dual_network import make_dual_network
-from sandbox._3moku.models.alpha_zero.self_play import self_play
-from sandbox._3moku.models.alpha_zero.train_network import train_network
-from sandbox._3moku.models.alpha_zero.evaluate_network import evaluate_network
-from sandbox._3moku.models.alpha_zero.evaluate_best_player import evaluate_best_player
+from src.gpt_ml.alpha_zero.dual_network import make_dual_network
+from src.gpt_ml.alpha_zero.selfplay import selfplay
+from src.gpt_ml.alpha_zero.train_network import train_network
+from src.gpt_ml.alpha_zero.evaluate_network import evaluate_network
 
 from dotenv import load_dotenv
 import os
@@ -13,11 +12,11 @@ load_dotenv()
 
 MODEL_DIR_PATH = os.getenv("MODEL_DIR_PATH")
 
+if MODEL_DIR_PATH is None:
+    raise RuntimeError("環境変数 MODEL_DIR_PATH が設定されていません。")
 
-# best.keras が存在しない場合、dual network の作成
-if not os.path.exists(f"{os.getenv(MODEL_DIR_PATH)}/best.keras"):
-    # dual network の作成
-    make_dual_network()
+# 初期モデルの作成
+make_dual_network()
 
 # 学習サイクル回数
 TRAIN_CYCLE_NUM = 100
@@ -25,14 +24,25 @@ TRAIN_CYCLE_NUM = 100
 # 学習サイクルの実行
 for cycle in range(TRAIN_CYCLE_NUM):
     print(f"===== TRAIN CYCLE {cycle + 1} / {TRAIN_CYCLE_NUM} =====")
-    # 自己対戦データの生成
-    self_play()
-    # ネットワークの学習
-    train_network()
-    # ネットワークの評価
-    update_best_player = evaluate_network()
-    # 最良プレイヤーの評価
-    if update_best_player:
-        print("モデルを更新しました。")
 
-# python -m sandbox._3moku.models.alpha_zero.train_cycle
+    # 1. 自己対戦データの生成
+    selfplay()
+
+    # 2. ネットワークの学習（latest.keras を更新）
+    train_network()
+
+    # 3. ネットワークの評価（latest vs best）
+    updated = evaluate_network()
+
+    # 4. 最良プレイヤー更新のログ
+    if updated:
+        print("モデルを更新しました。（latest -> best）")
+    else:
+        print("モデルは更新されませんでした。")
+
+    # もし「人間 or ルールベースとの評価」を追加したくなったら、
+    # evaluate_best_player(...) をここで呼ぶ形にすると良いです。
+
+if __name__ == "__main__":
+    # このファイルを直接実行したときのエントリポイント
+    pass
