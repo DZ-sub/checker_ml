@@ -41,11 +41,12 @@ checker_ml/
 │       ├── aws/           # AWS連携（S3）
 │       └── fastapi/       # APIサーバー
 ├── sandbox/               # 実験・検証用
-├── requirements.txt       # Python依存パッケージ
-├── Dockerfile            # Dockerイメージ定義
+├── outputs/               # 学習データ・モデル保存先（.gitignore）
+├── docs/                  # ドキュメント
+├── requirements.txt      # Python依存パッケージ
+├── Dockerfile.serve      # Dockerイメージ定義（推論用）
+├── Dockerfile.train      # Dockerイメージ定義（学習用）
 ├── docker-compose.yml    # Docker Compose設定
-├── DOCKER_SETUP.md       # Docker環境構築ガイド
-└── AWS_SETUP.md          # AWS環境構築ガイド
 ```
 
 ### ディレクトリの説明
@@ -67,16 +68,25 @@ checker_ml/
 - **Docker対応**: 環境構築が簡単で再現性の高い実行環境
 
 ## 技術スタック
-### src/game/（フロント層）
-- **ゲームエンジン**: Pygame
-### src/ml/（）
-- **機械学習**: TensorFlow 2.17.0 (Dockerベースイメージ), Keras 3.5.0
-- **Webフレームワーク**: FastAPI 0.118.0
-- **コンテナ**: Docker, Docker Compose
-- **クラウド**: AWS (S3, EC2, Lambda, SageMaker, APIGateway)
-- **言語**: Python 3.x
 
-### 機械学習部分（AlphaZero）について
+### 全体像
+![技術構成](docs/images/技術構成.png)
+
+### src/game/（ゲーム層・フロントエンド）
+- ゲーム画面・操作: Pygame（Python）
+
+### src/ml/（AIバックエンド層）
+- 機械学習: TensorFlow 2.17.0, Keras 3.5.0
+- Web API: FastAPI 0.118.0（AI予測API）
+- 言語: Python 3.x
+
+### インフラ（デプロイ基盤）
+- コンテナ: Docker, Docker Compose
+- クラウド: AWS（S3, EC2, Lambda, SageMaker, API Gateway）
+- IaC: Terraform
+
+
+### AIバックエンド層（AlphaZero）について
 - **src/ml/alpha_zero/dual_network.py**: ニューラルネットワークモデルの定義
 - **src/ml/alpha_zero/pv_mcts.py**: PVモンテカルロ木探索の実装
 - **src/ml/alpha_zero/selfplay.py**: セルフプレイによるデータ生成
@@ -211,11 +221,6 @@ y: Policy, Value
 [DOCKER_SETUP.md](./DOCKER_SETUP.md) を参照してください。
 
 ## API仕様
-
-### AWS環境のエンドポイント
-
-https://4djo1pd0h8.execute-api.ap-northeast-1.amazonaws.com/（dev）
-
 ### `POST /actions`
 
 
@@ -340,13 +345,13 @@ AIの次の手を取得
 container, componentレベルが難しく、かなり雑ではありますが、ご容赦ください。
 
 ### Context
-[C4モデル - コンテキスト図](docs/pdfs/context.pdf)
+![C4モデル - コンテキスト図](docs/images/context.png)
 
 ### Container
-[C4モデル - コンテナ図](docs/pdfs/container.pdf)
+![C4モデル - コンテナ図](docs/images/container.png)
 
 ### Component
-[C4モデル - コンポーネント図](docs/pdfs/component.pdf)
+![C4モデル - コンポーネント図](docs/images/component.png)
 
 ### Code
 ※ Codeレベルの図は今回は未実装
