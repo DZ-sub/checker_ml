@@ -221,11 +221,6 @@ y: Policy, Value
 [DOCKER_SETUP.md](./DOCKER_SETUP.md) を参照してください。
 
 ## API仕様
-
-### AWS環境のエンドポイント
-
-https://4djo1pd0h8.execute-api.ap-northeast-1.amazonaws.com/（dev）
-
 ### `POST /actions`
 
 
@@ -350,13 +345,13 @@ AIの次の手を取得
 container, componentレベルが難しく、かなり雑ではありますが、ご容赦ください。
 
 ### Context
-[C4モデル - コンテキスト図](docs/pdfs/context.pdf)
+![C4モデル - コンテキスト図](docs/images/context.png)
 
 ### Container
-[C4モデル - コンテナ図](docs/pdfs/container.pdf)
+![C4モデル - コンテナ図](docs/images/container.png)
 
 ### Component
-[C4モデル - コンポーネント図](docs/pdfs/component.pdf)
+![C4モデル - コンポーネント図](docs/images/component.png)
 
 ### Code
 ※ Codeレベルの図は今回は未実装
