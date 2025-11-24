@@ -84,7 +84,7 @@ checker_ml/
 - **src/ml/alpha_zero/evaluate_network.py**: モデルの評価と更新
 - **src/ml/alpha_zero/train_cycle.py**: 学習サイクルの管理
 
-## モデル開発
+## モデル開発（超ざっくり）※びっくりするぐらいざっくりです。
 ### 行動選択のためのモデル作成
 
 ```python
@@ -166,11 +166,10 @@ model.fit(
 ```
 xs: (N, 盤面高さ, 盤面幅, チャンネル数)のテンソル
 y: Policy, Value
-```
 
 ### 強化学習の全体像
 ```
-この AlphaZero 実装では、強化学習をざっくり言うと次のループとして実装している。
+自己対戦を繰り返しながら、モデルを学習していく。
 
 1. **行動選択モデル（dual_network）を作る**
    - `conv`（畳み込み + 残差ブロック）で盤面の特徴を抽出する。
@@ -221,7 +220,7 @@ https://4djo1pd0h8.execute-api.ap-northeast-1.amazonaws.com/（dev）
 
 
 **リクエスト:**
-```json
+```
 {
   "board": [
     [0, 1, 0, 0, 0, 0],
@@ -248,7 +247,7 @@ https://4djo1pd0h8.execute-api.ap-northeast-1.amazonaws.com/（dev）
 - `-1`: BLUE
 
 **レスポンス:**
-```json
+```
 {
   "version": "1.0.0",
   "action": {
