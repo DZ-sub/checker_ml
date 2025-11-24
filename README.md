@@ -41,11 +41,12 @@ checker_ml/
 │       ├── aws/           # AWS連携（S3）
 │       └── fastapi/       # APIサーバー
 ├── sandbox/               # 実験・検証用
-├── requirements.txt       # Python依存パッケージ
-├── Dockerfile            # Dockerイメージ定義
+├── outputs/               # 学習データ・モデル保存先（.gitignore）
+├── docs/                  # ドキュメント
+├── requirements.txt      # Python依存パッケージ
+├── Dockerfile.serve      # Dockerイメージ定義（推論用）
+├── Dockerfile.train      # Dockerイメージ定義（学習用）
 ├── docker-compose.yml    # Docker Compose設定
-├── DOCKER_SETUP.md       # Docker環境構築ガイド
-└── AWS_SETUP.md          # AWS環境構築ガイド
 ```
 
 ### ディレクトリの説明
@@ -67,16 +68,25 @@ checker_ml/
 - **Docker対応**: 環境構築が簡単で再現性の高い実行環境
 
 ## 技術スタック
-### src/game/（フロント層）
-- **ゲームエンジン**: Pygame
-### src/ml/（）
-- **機械学習**: TensorFlow 2.17.0 (Dockerベースイメージ), Keras 3.5.0
-- **Webフレームワーク**: FastAPI 0.118.0
-- **コンテナ**: Docker, Docker Compose
-- **クラウド**: AWS (S3, EC2, Lambda, SageMaker, APIGateway)
-- **言語**: Python 3.x
 
-### 機械学習部分（AlphaZero）について
+### 全体像
+[docs/images/container.png](docs/images/container.png)
+
+### src/game/（ゲーム層・フロントエンド）
+- ゲーム画面・操作: Pygame（Python）
+
+### src/ml/（AIバックエンド層）
+- 機械学習: TensorFlow 2.17.0, Keras 3.5.0
+- Web API: FastAPI 0.118.0（AI予測API）
+- 言語: Python 3.x
+
+### インフラ（デプロイ基盤）
+- コンテナ: Docker, Docker Compose
+- クラウド: AWS（S3, EC2, Lambda, SageMaker, API Gateway）
+- IaC: Terraform
+
+
+### AIバックエンド層（AlphaZero）について
 - **src/ml/alpha_zero/dual_network.py**: ニューラルネットワークモデルの定義
 - **src/ml/alpha_zero/pv_mcts.py**: PVモンテカルロ木探索の実装
 - **src/ml/alpha_zero/selfplay.py**: セルフプレイによるデータ生成
