@@ -70,7 +70,7 @@ checker_ml/
 ## 技術スタック
 
 ### 全体像
-[docs/images/container.png](docs/images/container.png)
+[docs/images/技術構成.png](docs/images/技術構成.png)
 
 ### src/game/（ゲーム層・フロントエンド）
 - ゲーム画面・操作: Pygame（Python）
