@@ -1,6 +1,6 @@
-from src.gpt_ml.checker_state import State
-from src.gpt_ml.alpha_zero.pv_mcts import pv_mcts_scores
-from src.gpt_ml.alpha_zero.dual_network import (
+from src.ml.checker_state import State
+from src.ml.alpha_zero.pv_mcts import pv_mcts_scores
+from src.ml.alpha_zero.dual_network import (
     DN_OUTPUT_SIZE,
     action_to_index,
 )
@@ -75,7 +75,12 @@ def get_action_by_pv_mcts(req: RequestState):
 # 最初にモデルをロードしておく
 @app.on_event("startup")
 def skd_startup():
-    app.state.model = load_model_from_s3("saved_models", "best.keras")
+    try:
+        print("モデルをS3からロード中...")
+        app.state.model = load_model_from_s3("saved_models", "best.keras")
+    except Exception as e:
+        print(f"モデルのロードに失敗しました: {e}")
+        raise e
 
 
 @app.get("/")

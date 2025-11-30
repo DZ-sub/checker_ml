@@ -1,13 +1,13 @@
 import requests
 
-url = "http://localhost:8000/action"
+url = "http://localhost:8080/invocations"
 
 state = {
     "board": [
         [0, 1, 0, 0, 0, 0],
-        [1, 0, 0, 0, 0, 1],
+        [1, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 1, 0],
         [0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 1],
         [0, -1, 0, 0, -1, 0],
         [0, 0, 0, 0, 0, 0],
     ],

@@ -20,6 +20,13 @@
 ローカルでのビルド（PowerShell 例）
 
 ```powershell
+# docker に環境変数を渡す場合は -e オプションを使う
+# 例: S3 バケット名や AWS リージョンを環境変数で渡す場合
+docker build -f Dockerfile.serve -t checker-serve .
+docker run --rm -e S3_BUCKET_NAME=my-bucket -e AWS_REGION=ap-northeast-1 -e AWS_ACCESS_KEY_ID=<> -e AWS_SECRET_ACCESS_KEY=<>
+```
+
+```powershell
 # serve イメージをビルド
 docker build -f Dockerfile.serve -t checker-serve:latest .
 
